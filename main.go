@@ -160,6 +160,8 @@ func processAndUpdate(filename string) {
 				} else {
 					logDebug("Killed process: %s", exe)
 				}
+				// 等待dll占用被解除
+				time.Sleep(100 * time.Millisecond)
 			}
 		}
 	}
@@ -176,8 +178,7 @@ func processAndUpdate(filename string) {
 		log.Fatalf("Failed to extract new version: %v", err)
 	}
 
-	// 强制删除文件
-	err = retryRemove(filename, 5, 500*time.Millisecond)
+	err = os.Remove(filename)
 	if err != nil {
 		logDebug("Failed to remove file %s: %v", filename, err)
 	}
@@ -208,25 +209,6 @@ func cleanDirectory(targetPath string, exclude []string) error {
 		}
 	}
 	return nil
-}
-
-func retryRemove(path string, retries int, delay time.Duration) error {
-	for i := 0; i < retries; i++ {
-		err := os.Remove(path)
-		if err == nil {
-			return nil
-		}
-
-		// 检查是否是访问被拒绝的错误，并继续尝试删除
-		if os.IsPermission(err) {
-			logDebug("Access denied when removing %s, retrying...", path)
-		} else {
-			return fmt.Errorf("failed to remove %s: %v", path, err)
-		}
-
-		time.Sleep(delay)
-	}
-	return fmt.Errorf("failed to remove %s after %d retries", path, retries)
 }
 
 func unzipWithExclusion(src, dest string, exclude []string) error {
