@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"flag"
 	"fmt"
+	"github.com/Sn0wo2/NapCatShellUpdater/helper"
 	"github.com/shirou/gopsutil/process"
 	"github.com/tidwall/gjson"
 	"io"
@@ -15,26 +16,46 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strings"
 	"time"
 )
 
 var (
-	path  string
-	run   bool
-	proxy string
-	debug bool
+	path           string
+	run            bool
+	proxy          string
+	debug          bool
+	napCatPanelURL string
+	napCatToken    string
 )
 
-func main() {
+func init() {
 	flag.StringVar(&path, "path", "./", "NapCat path")
 	flag.BoolVar(&run, "run", true, "Run NapCat")
 	flag.StringVar(&proxy, "proxy", "", "HTTP Proxy")
 	flag.BoolVar(&debug, "debug", false, "Enable debug logging")
+	flag.StringVar(&napCatPanelURL, "napCatPanelURL", "", "NapCat Panel URL")
+	flag.StringVar(&napCatToken, "napCatToken", "", "NapCat Token")
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	checkSystem()
 
+	fmt.Println(`$$\   $$\                   $$$$$$\           $$\     $$$$$$\ $$\               $$\$$\$$\   $$\               $$\          $$\                       
+$$$\  $$ |                 $$  __$$\          $$ |   $$  __$$\$$ |              $$ $$ $$ |  $$ |              $$ |         $$ |                      
+$$$$\ $$ |$$$$$$\  $$$$$$\ $$ /  \__|$$$$$$\$$$$$$\  $$ /  \__$$$$$$$\  $$$$$$\ $$ $$ $$ |  $$ |$$$$$$\  $$$$$$$ |$$$$$$\$$$$$$\   $$$$$$\  $$$$$$\  
+$$ $$\$$ |\____$$\$$  __$$\$$ |      \____$$\_$$  _| \$$$$$$\ $$  __$$\$$  __$$\$$ $$ $$ |  $$ $$  __$$\$$  __$$ |\____$$\_$$  _| $$  __$$\$$  __$$\ 
+$$ \$$$$ |$$$$$$$ $$ /  $$ $$ |      $$$$$$$ |$$ |    \____$$\$$ |  $$ $$$$$$$$ $$ $$ $$ |  $$ $$ /  $$ $$ /  $$ |$$$$$$$ |$$ |   $$$$$$$$ $$ |  \__|
+$$ |\$$$ $$  __$$ $$ |  $$ $$ |  $$\$$  __$$ |$$ |$$\$$\   $$ $$ |  $$ $$   ____$$ $$ $$ |  $$ $$ |  $$ $$ |  $$ $$  __$$ |$$ |$$\$$   ____$$ |      
+$$ | \$$ \$$$$$$$ $$$$$$$  \$$$$$$  \$$$$$$$ |\$$$$  \$$$$$$  $$ |  $$ \$$$$$$$\$$ $$ \$$$$$$  $$$$$$$  \$$$$$$$ \$$$$$$$ |\$$$$  \$$$$$$$\$$ |      
+\__|  \__|\_______$$  ____/ \______/ \_______| \____/ \______/\__|  \__|\_______\__\__|\______/$$  ____/ \_______|\_______| \____/ \_______\__|      
+                  $$ |                                                                         $$ |                                                  
+                  $$ |                                                                         $$ |                                                  
+                  \__|                                                                         \__|                                                  `)
+
+	checkSystem()
+}
+
+func main() {
 	newVersion, downloadURL := fetchLastNapCatDownloadURL()
 	currentVersion := getCurrentNapCatVersion()
 	if newVersion != currentVersion {
@@ -49,8 +70,81 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to run NapCat: %v", err)
 		}
+		time.Sleep(12 * time.Second)
+		token := loginNapCatPanel()
+		setNapCatQuickLogin(token, getNapCatPanelLoginList(token))
 	}
-	fmt.Scanln()
+
+}
+func loginNapCatPanel() (token string) {
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/NapCat/api/auth/login", napCatPanelURL), strings.NewReader(fmt.Sprintf(`{"token":"%s"}`, napCatToken)))
+	if err != nil {
+		log.Fatalf("Failed to create HTTP request: %v", err)
+	}
+	req.Header.Add("Content-Type", "application/json")
+	client := http.DefaultClient
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("Failed to login: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Failed to read response body: %v", err)
+	}
+	return gjson.Parse(helper.BytesToString(body)).Get("data.Credential").String()
+}
+
+func getNapCatPanelLoginList(token string) []int64 {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/NapCat/api/QQLogin/GetQuickLoginList", napCatPanelURL), nil)
+	if err != nil {
+		log.Fatalf("Failed to create HTTP request: %v", err)
+	}
+	req.Header.Add("Authorization", "Bearer "+token)
+	client := http.DefaultClient
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("Failed to login: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Failed to read response body: %v", err)
+	}
+	var loginList []int64
+	gjson.Parse(helper.BytesToString(body)).Get("data").ForEach(func(key, value gjson.Result) bool {
+		loginList = append(loginList, value.Int())
+		return true
+	})
+	return loginList
+}
+
+func setNapCatQuickLogin(token string, loginList []int64) {
+	if len(loginList) < 1 {
+		return
+	}
+	for _, uin := range loginList {
+		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/NapCat/api/QQLogin/SetQuickLogin", napCatPanelURL), strings.NewReader(fmt.Sprintf(`{"uin":"%d"}`, uin)))
+		if err != nil {
+			log.Fatalf("Failed to create HTTP request: %v", err)
+		}
+		req.Header.Add("Content-Type", "application/json")
+		req.Header.Add("Authorization", "Bearer "+token)
+		client := http.DefaultClient
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatalf("Failed to login: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode == http.StatusOK {
+			logDebug("Quick login: %d", uin)
+		} else {
+			fmt.Println("Failed login fucking napcat:", uin, "status:", resp.StatusCode)
+		}
+		time.Sleep(222 * time.Millisecond)
+	}
 }
 
 func checkSystem() {
