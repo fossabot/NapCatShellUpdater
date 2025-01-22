@@ -27,6 +27,7 @@ var (
 	debug          bool
 	napCatPanelURL string
 	napCatToken    string
+	login          bool
 )
 
 func init() {
@@ -36,6 +37,7 @@ func init() {
 	flag.BoolVar(&debug, "debug", false, "Enable debug logging")
 	flag.StringVar(&napCatPanelURL, "napCatPanelURL", "", "NapCat Panel URL")
 	flag.StringVar(&napCatToken, "napCatToken", "", "NapCat Token")
+	flag.BoolVar(&login, "login", false, "Login to NapCat Panel")
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
@@ -56,6 +58,10 @@ $$ | \$$ \$$$$$$$ $$$$$$$  \$$$$$$  \$$$$$$$ |\$$$$  \$$$$$$  $$ |  $$ \$$$$$$$\
 }
 
 func main() {
+	if login {
+		loginNapCat()
+		return
+	}
 	newVersion, downloadURL := fetchLastNapCatDownloadURL()
 	currentVersion := getCurrentNapCatVersion()
 	if newVersion != currentVersion {
@@ -66,16 +72,26 @@ func main() {
 	}
 
 	if run {
-		err := exec.Command("cmd", "/C", "start", "", "quickLoginExample.bat").Run()
+		logDebug("Running NapCat...")
+		err := exec.Command("cmd", "/C", "", "quickLoginExample.bat").Run()
 		if err != nil {
 			log.Fatalf("Failed to run NapCat: %v", err)
 		}
+		logDebug("Sleeping for 12 seconds...")
 		time.Sleep(12 * time.Second)
-		token := loginNapCatPanel()
-		setNapCatQuickLogin(token, getNapCatPanelLoginList(token))
+		logDebug("Logging into NapCat...")
+		loginNapCat()
 	}
-
 }
+
+func loginNapCat() {
+	if napCatPanelURL == "" || napCatToken == "" {
+		log.Fatalf("NapCat Panel URL or Token is empty")
+	}
+	token := loginNapCatPanel()
+	setNapCatQuickLogin(token, getNapCatPanelLoginList(token))
+}
+
 func loginNapCatPanel() (token string) {
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/NapCat/api/auth/login", napCatPanelURL), strings.NewReader(fmt.Sprintf(`{"token":"%s"}`, napCatToken)))
 	if err != nil {
@@ -93,6 +109,7 @@ func loginNapCatPanel() (token string) {
 	if err != nil {
 		log.Fatalf("Failed to read response body: %v", err)
 	}
+	logDebug("Login response: %s", helper.BytesToString(body))
 	return gjson.Parse(helper.BytesToString(body)).Get("data.Credential").String()
 }
 
@@ -118,13 +135,11 @@ func getNapCatPanelLoginList(token string) []int64 {
 		loginList = append(loginList, value.Int())
 		return true
 	})
+	logDebug("Login list: %v", loginList)
 	return loginList
 }
 
 func setNapCatQuickLogin(token string, loginList []int64) {
-	if len(loginList) < 1 {
-		return
-	}
 	for _, uin := range loginList {
 		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/NapCat/api/QQLogin/SetQuickLogin", napCatPanelURL), strings.NewReader(fmt.Sprintf(`{"uin":"%d"}`, uin)))
 		if err != nil {
@@ -141,7 +156,7 @@ func setNapCatQuickLogin(token string, loginList []int64) {
 		if resp.StatusCode == http.StatusOK {
 			logDebug("Quick login: %d", uin)
 		} else {
-			fmt.Println("Failed login fucking napcat:", uin, "status:", resp.StatusCode)
+			fmt.Println("Failed login napcat:", uin, "status:", resp.StatusCode)
 		}
 		time.Sleep(222 * time.Millisecond)
 	}
