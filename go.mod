@@ -4,6 +4,8 @@ go 1.24rc2
 
 require (
 	github.com/shirou/gopsutil v2.21.11+incompatible
+	github.com/sirupsen/logrus v1.9.3
+	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816
 	github.com/tidwall/gjson v1.18.0
 )
 
