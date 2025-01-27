@@ -66,7 +66,7 @@ func cleanDirectory(targetPath string, exclude []string) error {
 			err := os.RemoveAll(filePath)
 			if err != nil {
 				log.Info("NapCatShellUpdater", "Waiting QQ.exe process to end...")
-				err = WaitForAllProcessesEnd(filepath.Join(flags.Config.Path, "QQ.exe"))
+				err = <-WaitForAllProcessesEnd("QQ.exe", false)
 				if err != nil {
 					panic(err)
 				}
@@ -76,9 +76,9 @@ func cleanDirectory(targetPath string, exclude []string) error {
 			err := os.Remove(filePath)
 			if err != nil {
 				log.Info("NapCatShellUpdater", "Waiting QQ.exe process to end...")
-				err = WaitForAllProcessesEnd(filepath.Join(flags.Config.Path, "QQ.exe"))
-				if err != nil {
-					panic(err)
+				err2 := <-WaitForAllProcessesEnd("QQ.exe", false)
+				if err2 != nil {
+					panic(err2)
 				}
 				return fmt.Errorf("failed to remove file %s: %w", filePath, err)
 			}

@@ -12,7 +12,7 @@ import (
 
 func processAndUpdate(filename string) {
 	log.Info("NapCatShellUpdater", "Waiting NapCatWinBootMain.exe process to end...")
-	err := WaitForAllProcessesEnd(filepath.Join(flags.Config.Path, "NapCatWinBootMain.exe"))
+	err := <-WaitForAllProcessesEnd(filepath.Join(flags.Config.Path, "NapCatWinBootMain.exe"), true)
 	if err != nil {
 		panic(err)
 	}
@@ -35,66 +35,89 @@ func processAndUpdate(filename string) {
 	}
 }
 
-func WaitForProcess(targetPath string) (*process.Process, error) {
-	initialProcs, err := process.Processes()
-	if err != nil {
-		return nil, err
-	}
-	initialProcIDs := make(map[int32]struct{})
-	for _, p := range initialProcs {
-		initialProcIDs[p.Pid] = struct{}{}
-	}
+func WaitForProcess(targetPath string) (<-chan *process.Process, <-chan error) {
+	resultChan := make(chan *process.Process)
+	errorChan := make(chan error, 1)
 
-	for {
-		// 减少轮询频率，例如从1秒调整到2秒
-		time.Sleep(1 * time.Second)
+	go func() {
+		defer close(resultChan)
+		defer close(errorChan)
 
-		procs, err := process.Processes()
+		initialProcs, err := process.Processes()
 		if err != nil {
-			return nil, err
+			errorChan <- err
+			return
 		}
 
-		for _, proc := range procs {
-			if _, existed := initialProcIDs[proc.Pid]; existed {
-				continue
-			}
+		initialProcIDs := make(map[int32]struct{})
+		for _, p := range initialProcs {
+			initialProcIDs[p.Pid] = struct{}{}
+		}
+		for {
+			time.Sleep(2 * time.Second)
 
-			path, err := proc.Exe()
+			procs, err := process.Processes()
 			if err != nil {
-				continue
+				errorChan <- err
+				return
 			}
 
-			if path == targetPath {
-				return proc, nil
+			for _, proc := range procs {
+				if _, existed := initialProcIDs[proc.Pid]; !existed {
+					path, err := proc.Exe()
+					if err != nil {
+						continue
+					}
+					if path == targetPath {
+						resultChan <- proc
+						return
+					}
+				}
 			}
 		}
-	}
+	}()
+
+	return resultChan, errorChan
 }
 
-func WaitForAllProcessesEnd(targetPath string) error {
-	for {
-		allProcs, err := process.Processes()
-		if err != nil {
-			return err
-		}
+func WaitForAllProcessesEnd(target string, abs bool) <-chan error {
+	errorChan := make(chan error, 1)
 
-		activeProcs := 0
+	go func() {
+		defer close(errorChan)
 
-		for _, proc := range allProcs {
-			exePath, err := proc.Exe()
+		for {
+			allProcs, err := process.Processes()
 			if err != nil {
-				continue
+				errorChan <- err
+				return
 			}
 
-			if filepath.Dir(exePath) == targetPath {
-				activeProcs++
+			activeProcs := 0
+			for _, proc := range allProcs {
+				exePath, err := proc.Exe()
+				if err != nil {
+					continue
+				}
+
+				if abs {
+					if exePath == target {
+						activeProcs++
+					}
+				} else {
+					if name, err := proc.Name(); err != nil && name == target {
+						activeProcs++
+					}
+				}
 			}
-		}
 
-		if activeProcs == 0 {
-			return nil
-		}
+			if activeProcs == 0 {
+				return
+			}
 
-		time.Sleep(2 * time.Second)
-	}
+			time.Sleep(2 * time.Second)
+		}
+	}()
+
+	return errorChan
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat"
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat/login"
 	"github.com/sirupsen/logrus"
+	"os"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -42,13 +43,16 @@ func main() {
 	if flags.Config.Login {
 		log.Info("NapCatShellUpdater", "Wating NapCat process to login...")
 		ncProc, err := napcat.WaitForProcess(filepath.Join(flags.Config.Path, "NapCatWinBootMain.exe"))
-		if err != nil {
-			panic(err)
+		select {
+		case p := <-ncProc:
+			log.Debug("NapCatShellUpdater", "NapCat process found:", p.String())
+		case e := <-err:
+			log.Error("NapCatShellUpdater", "Failed to find NapCat process:", e)
+			os.Exit(1)
 		}
-		log.Debug("NapCatShellUpdater", "NapCat process found:", ncProc.String())
-		log.Debug("NapCatShellUpdater", "Waiting 12s to full load NapCat")
-		time.Sleep(12 * time.Second)
+		log.Debug("NapCatShellUpdater", "Waiting 30s to full load NapCat")
+		time.Sleep(30 * time.Second)
 		log.Info("NapCatShellUpdater", "Login to NapCat Panel...")
-		login.LoginNapCat()
+		login.NapCatLogin()
 	}
 }

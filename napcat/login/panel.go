@@ -12,17 +12,23 @@ import (
 	"time"
 )
 
-func LoginNapCat() {
+func NapCatLogin() {
 	if flags.Config.NapCatPanelURL == "" || flags.Config.NapCatToken == "" {
 		log.Error("NapCatShellUpdater", "NapCatPanelURL or NapCatToken is empty")
 		return
 	}
 	token := loginNapCatPanel()
-	setNapCatQuickLogin(token, getNapCatPanelLoginList(token))
+	if token != "" {
+		loginList := getNapCatPanelLoginList(token)
+		if len(loginList) <= 0 {
+			return
+		}
+		setNapCatQuickLogin(token, loginList)
+	}
 }
 
 func loginNapCatPanel() (token string) {
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/NapCat/api/auth/login", flags.Config.NapCatPanelURL), strings.NewReader(fmt.Sprintf(`{"token":"%s"}`, flags.Config.NapCatToken)))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/auth/login", flags.Config.NapCatPanelURL), strings.NewReader(fmt.Sprintf(`{"token":"%s"}`, flags.Config.NapCatToken)))
 	if err != nil {
 		panic(err)
 	}
@@ -38,11 +44,12 @@ func loginNapCatPanel() (token string) {
 	if err != nil {
 		panic(err)
 	}
+	log.Trace("NapCatShellUpdater", "Login to NapCat Panel:", helper.BytesToString(body))
 	return gjson.Parse(helper.BytesToString(body)).Get("data.Credential").String()
 }
 
 func getNapCatPanelLoginList(token string) []int64 {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/NapCat/api/QQLogin/GetQuickLoginList", flags.Config.NapCatPanelURL), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/QQLogin/GetQuickLoginList", flags.Config.NapCatPanelURL), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -63,12 +70,13 @@ func getNapCatPanelLoginList(token string) []int64 {
 		loginList = append(loginList, value.Int())
 		return true
 	})
+	log.Trace("NapCatShellUpdater", "Get NapCat Panel Login List:", loginList)
 	return loginList
 }
 
 func setNapCatQuickLogin(token string, loginList []int64) {
 	for _, uin := range loginList {
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/NapCat/api/QQLogin/SetQuickLogin", flags.Config.NapCatToken), strings.NewReader(fmt.Sprintf(`{"uin":"%d"}`, uin)))
+		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/QQLogin/SetQuickLogin", flags.Config.NapCatPanelURL), strings.NewReader(fmt.Sprintf(`{"uin":"%d"}`, uin)))
 		if err != nil {
 			panic(err)
 		}
@@ -80,6 +88,8 @@ func setNapCatQuickLogin(token string, loginList []int64) {
 			panic(err)
 		}
 		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		log.Trace("NapCatShellUpdater", uin, " | Set NapCat Panel Quick Login:", helper.BytesToString(body))
 		time.Sleep(222 * time.Millisecond)
 	}
 }
