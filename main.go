@@ -33,6 +33,8 @@ $$ | \$$ \$$$$$$$ $$$$$$$  \$$$$$$  \$$$$$$$ |\$$$$  \$$$$$$  $$ |  $$ \$$$$$$$\
                   $$ |                                                                         $$ |                                                  
                   \__|                                                                         \__|                                                  `)
 
+	log.Info("NapCatShellUpdater", "Loading...")
+
 	if runtime.GOOS != "windows" {
 		log.Error("NapCatShellUpdater", "Unsupported system:", runtime.GOOS)
 	}

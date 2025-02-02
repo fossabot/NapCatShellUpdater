@@ -20,7 +20,7 @@ func CheckNapCatUpdate() {
 		log.Info("NapCatShellUpdater", fmt.Sprintf("Updating NapCat from %s to %s", currentVersion, newVersion))
 		processAndUpdate(downloadFile(downloadURL))
 	} else {
-		log.Debug("NapCatShellUpdater", "NapCat is up to date:", currentVersion)
+		log.Info("NapCatShellUpdater", "NapCat is up to date: ", currentVersion)
 	}
 }
 
@@ -63,7 +63,7 @@ func fetchLastNapCatDownloadURL() (string, string) {
 		panic(err)
 	}
 
-	release := gjson.ParseBytes(body).Array()[0]
+	release := gjson.Parse(helper.BytesToString(body)).Array()[0]
 	version := release.Get("tag_name").String()
 	downloadURL := release.Get("assets.#(name==NapCat.Shell.zip).browser_download_url").String()
 	if version == "" || downloadURL == "" {
