@@ -9,5 +9,5 @@
 
 ```
 将程序放在你的NapCat.Shell工作目录双击打开
-或使用命令./NapCatShellUpdater -proxy=httpproxy -run=true ncpanel=http://127.0.0.1:6099 -nctoken=token -debug=true -login=true
+或使用命令./NapCatShellUpdater -proxy=httpproxy -run=true ncpanel=http://127.0.0.1:6099 -nctoken=token -debug=true -login=true -version=v0.0.0
 ```
