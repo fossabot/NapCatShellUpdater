@@ -41,7 +41,12 @@ $$ | \$$ \$$$$$$$ $$$$$$$  \$$$$$$  \$$$$$$$ |\$$$$  \$$$$$$  $$ |  $$ \$$$$$$$\
 }
 
 func main() {
-	napcat.CheckNapCatUpdate()
+	cv := flags.Config.Version
+	if cv == "" {
+		napcat.CheckNapCatUpdate()
+	} else {
+		napcat.ProcessVersionUpdate(cv)
+	}
 	if flags.Config.Login {
 		log.Info("NapCatShellUpdater", "Wating NapCat process to login...")
 		ncProc, err := napcat.WaitForProcess(filepath.Join(flags.Config.Path, "NapCatWinBootMain.exe"))

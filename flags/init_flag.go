@@ -13,6 +13,7 @@ var Config struct {
 	NapCatPanelURL string
 	NapCatToken    string
 	Login          bool
+	Version        string
 }
 
 func InitFlag() bool {
@@ -29,6 +30,7 @@ func InitFlag() bool {
 	flag.StringVar(&Config.NapCatPanelURL, "ncpanel", "http://127.0.0.1:6099", "NapCat Panel URL")
 	flag.StringVar(&Config.NapCatToken, "nctoken", "token", "NapCat Token")
 	flag.BoolVar(&Config.Login, "login", true, "Login to NapCat Panel")
+	flag.StringVar(&Config.Version, "version", "", "Update NapCat Version")
 	flag.Parse()
 	return true
 }

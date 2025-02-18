@@ -14,17 +14,24 @@ import (
 )
 
 func CheckNapCatUpdate() {
-	newVersion, downloadURL := fetchLastNapCatDownloadURL()
+	newVersion := fetchLastNapCatDownloadURL()
 	currentVersion := getCurrentNapCatVersion()
 	if newVersion != currentVersion {
 		log.Info("NapCatShellUpdater", fmt.Sprintf("Updating NapCat from %s to %s", currentVersion, newVersion))
-		processAndUpdate(downloadFile(downloadURL))
+		processAndUpdate(downloadFile(fmt.Sprintf("https://github.com/NapNeko/NapCatQQ/releases/download/%s/NapCat.Shell.zip", newVersion)))
 	} else {
 		log.Info("NapCatShellUpdater", "NapCat is up to date: ", currentVersion)
 	}
 }
 
-func getCurrentNapCatVersion() string {
+func ProcessVersionUpdate(ver string) {
+	if ver == "" {
+		return
+	}
+	processAndUpdate(downloadFile(fmt.Sprintf("https://github.com/NapNeko/NapCatQQ/releases/download/%s/NapCat.Shell.zip", ver)))
+}
+
+func getCurrentNapCatVersion() (ver string) {
 	data, err := os.ReadFile(filepath.Join(flags.Config.Path, "package.json"))
 	if err != nil {
 		panic(err)
@@ -36,7 +43,7 @@ func getCurrentNapCatVersion() string {
 	return "v" + version
 }
 
-func fetchLastNapCatDownloadURL() (string, string) {
+func fetchLastNapCatDownloadURL() (ver string) {
 	req, err := http.NewRequest(http.MethodGet, "https://api.github.com/repos/NapNeko/NapCatQQ/releases?per_page=1", nil)
 	if err != nil {
 		panic(err)
@@ -64,11 +71,10 @@ func fetchLastNapCatDownloadURL() (string, string) {
 	}
 
 	release := gjson.Parse(helper.BytesToString(body)).Array()[0]
-	version := release.Get("tag_name").String()
-	downloadURL := release.Get("assets.#(name==NapCat.Shell.zip).browser_download_url").String()
-	if version == "" || downloadURL == "" {
+	version := release.Get("tag_name").Str
+	if version == "" {
 		log.Error("NapCatShellUpdater", "Failed to fetch version info\n", helper.BytesToString(body))
-		os.Exit(1)
+		return version
 	}
-	return version, downloadURL
+	return version
 }
