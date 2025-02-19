@@ -1,6 +1,7 @@
 package login
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/Sn0wo2/NapCatShellUpdater/flags"
 	"github.com/Sn0wo2/NapCatShellUpdater/helper"
@@ -8,15 +9,15 @@ import (
 	"github.com/tidwall/gjson"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
 
 func NapCatLogin() {
-	if flags.Config.NapCatPanelURL == "" || flags.Config.NapCatToken == "" {
-		log.Error("NapCatShellUpdater", "NapCatPanelURL or NapCatToken is empty")
-		return
-	}
 	token := loginNapCatPanel()
 	if token != "" {
 		loginList := getNapCatPanelLoginList(token)
@@ -25,6 +26,76 @@ func NapCatLogin() {
 		}
 		setNapCatQuickLogin(token, loginList)
 	}
+}
+
+func GetNapCatPanelURLInLogs(dirPath string) (string, string, error) {
+	// 验证目录路径
+	fileInfo, err := os.Stat(dirPath)
+	if err != nil || !fileInfo.IsDir() {
+		return "", "", fmt.Errorf("invalid directory path: %s", dirPath)
+	}
+
+	// 读取目录条目
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to read directory: %v", err)
+	}
+
+	// 预编译正则表达式
+	urlTokenRegex := regexp.MustCompile(`(https?://[^\s:/]+:\d+)/webui\?token=([^\s]+)`)
+
+	// 收集并排序日志文件
+	var logFiles []struct {
+		Path    string
+		ModTime time.Time
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || strings.HasPrefix(entry.Name(), ".") || strings.ToLower(filepath.Ext(entry.Name())) != ".log" {
+			continue
+		}
+
+		fullPath := filepath.Join(dirPath, entry.Name())
+		fileInfo, err := entry.Info()
+		if err != nil {
+			continue
+		}
+
+		logFiles = append(logFiles, struct {
+			Path    string
+			ModTime time.Time
+		}{
+			Path:    fullPath,
+			ModTime: fileInfo.ModTime(),
+		})
+	}
+
+	if len(logFiles) == 0 {
+		return "", "", fmt.Errorf("no log files found in %s", dirPath)
+	}
+
+	// 按修改时间排序（最新优先）
+	sort.Slice(logFiles, func(i, j int) bool {
+		return logFiles[i].ModTime.After(logFiles[j].ModTime)
+	})
+
+	// 检查每个日志文件
+	for _, logFile := range logFiles {
+		f, err := os.Open(logFile.Path)
+		if err != nil {
+			continue
+		}
+		defer f.Close()
+
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			matches := urlTokenRegex.FindStringSubmatch(scanner.Text())
+			if len(matches) >= 3 {
+				return matches[1], matches[2], nil
+			}
+		}
+	}
+
+	return "", "", fmt.Errorf("no matching URL found in %s", dirPath)
 }
 
 func loginNapCatPanel() (token string) {

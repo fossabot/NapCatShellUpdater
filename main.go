@@ -7,6 +7,7 @@ import (
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat"
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat/login"
 	"github.com/sirupsen/logrus"
+	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -60,6 +61,17 @@ func main() {
 		log.Debug("NapCatShellUpdater", "Waiting 30s to full load NapCat")
 		time.Sleep(30 * time.Second)
 		log.Info("NapCatShellUpdater", "Login to NapCat Panel...")
+		if flags.Config.NapCatPanelURL == "" || flags.Config.NapCatToken == "" {
+			log.Error("NapCatShellUpdater", "NapCatPanelURL or NapCatToken is empty, trying find NapCat Panel url and token in logs...")
+			url, token, err := login.GetNapCatPanelURLInLogs(filepath.Join(flags.Config.Path, "logs"))
+			if err != nil {
+				panic(err)
+			}
+			flags.Config.NapCatPanelURL = url
+			flags.Config.NapCatToken = token
+		}
+		log.Debug("NapCatShellUpdater", "Panel URL: ", flags.Config.NapCatPanelURL)
+		log.Debug("NapCatShellUpdater", "Panel Token: ", flags.Config.NapCatToken)
 		login.NapCatLogin()
 	}
 }

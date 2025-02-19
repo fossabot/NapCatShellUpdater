@@ -25,18 +25,25 @@ func CheckNapCatUpdate() {
 }
 
 func ProcessVersionUpdate(ver string) {
-	if ver == "" {
+	currentVersion := getCurrentNapCatVersion()
+	if ver == "" || currentVersion == "" {
+		log.Error("NapCatShellUpdater", "Failed to fetch version info", ver, currentVersion)
 		return
 	}
-	processAndUpdate(downloadFile(fmt.Sprintf("https://github.com/NapNeko/NapCatQQ/releases/download/%s/NapCat.Shell.zip", ver)))
+	if ver != currentVersion {
+		processAndUpdate(downloadFile(fmt.Sprintf("https://github.com/NapNeko/NapCatQQ/releases/download/%s/NapCat.Shell.zip", ver)))
+	} else {
+		log.Info("NapCatShellUpdater", "NapCat is up to date: ", currentVersion)
+	}
 }
 
 func getCurrentNapCatVersion() (ver string) {
-	data, err := os.ReadFile(filepath.Join(flags.Config.Path, "package.json"))
+	packageFile, err := os.ReadFile(filepath.Join(flags.Config.Path, "package.json"))
 	if err != nil {
-		panic(err)
+		log.Error("NapCatShellUpdater", "failed to read package.json:", err)
+		return "v0.0.0(Error)"
 	}
-	version := gjson.GetBytes(data, "version").String()
+	version := gjson.GetBytes(packageFile, "version").String()
 	if version == "" {
 		version = "0.0.0(Not Found)"
 	}

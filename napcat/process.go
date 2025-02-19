@@ -4,7 +4,6 @@ import (
 	"github.com/Sn0wo2/NapCatShellUpdater/flags"
 	"github.com/Sn0wo2/NapCatShellUpdater/log"
 	"github.com/shirou/gopsutil/process"
-
 	"os"
 	"path/filepath"
 	"time"
