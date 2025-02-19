@@ -7,7 +7,6 @@ import (
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat"
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat/login"
 	"github.com/sirupsen/logrus"
-	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"runtime"
