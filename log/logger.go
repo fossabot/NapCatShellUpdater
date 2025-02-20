@@ -39,7 +39,7 @@ func InitLogger(logPath string, formatter *easy.Formatter, logLevel logrus.Level
 }
 
 // Log a message with a prefix at the specified level.
-func logWithPrefix(level logrus.Level, prefix string, args ...interface{}) {
+func logWithPrefix(level logrus.Level, prefix string, args ...any) {
 	entry := Logger.WithField("prefix", prefix)
 	switch level {
 	case logrus.TraceLevel:
@@ -60,73 +60,73 @@ func logWithPrefix(level logrus.Level, prefix string, args ...interface{}) {
 }
 
 // Trace logs a message at level Trace with a prefix.
-func Trace(prefix string, args ...interface{}) {
+func Trace(prefix string, args ...any) {
 	logWithPrefix(logrus.TraceLevel, prefix, args...)
 }
 
 // Debug logs a message at level Debug with a prefix.
-func Debug(prefix string, args ...interface{}) {
+func Debug(prefix string, args ...any) {
 	logWithPrefix(logrus.DebugLevel, prefix, args...)
 }
 
 // Info logs a message at level Info with a prefix.
-func Info(prefix string, args ...interface{}) {
+func Info(prefix string, args ...any) {
 	logWithPrefix(logrus.InfoLevel, prefix, args...)
 }
 
 // Warning logs a message at level Warning with a prefix.
-func Warning(prefix string, args ...interface{}) {
+func Warning(prefix string, args ...any) {
 	logWithPrefix(logrus.WarnLevel, prefix, args...)
 }
 
 // Warn logs a message at level Warn with a prefix.
-func Warn(prefix string, args ...interface{}) {
+func Warn(prefix string, args ...any) {
 	logWithPrefix(logrus.WarnLevel, prefix, args...)
 }
 
 // Error logs a message at level Error with a prefix.
-func Error(prefix string, args ...interface{}) {
+func Error(prefix string, args ...any) {
 	logWithPrefix(logrus.ErrorLevel, prefix, args...)
 }
 
 // Panic logs a message at level Panic with a prefix.
-func Panic(prefix string, args ...interface{}) {
+func Panic(prefix string, args ...any) {
 	logWithPrefix(logrus.PanicLevel, prefix, args...)
 }
 
 // Fatal logs a message at level Fatal with a prefix.
-func Fatal(prefix string, args ...interface{}) {
+func Fatal(prefix string, args ...any) {
 	logWithPrefix(logrus.FatalLevel, prefix, args...)
 }
 
 // RPanic logs a message at level Error with stack trace, without exiting the program.
-func RPanic(data ...interface{}) {
+func RPanic(args ...any) {
 	buf := make([]byte, 4096)
 	n := runtime.Stack(buf, false)
 	if n < len(buf) {
 		buf = buf[:n]
 	}
 
-	Error("panic", TrimJSONArray(fmt.Sprint(data...)), "\n", helper.BytesToString(buf))
+	Error("panic", TrimJSONArray(fmt.Sprint(args...)), "\n", helper.BytesToString(buf))
 }
 
 // TrimJSONArray trims the JSON array from the string for print
-func TrimJSONArray(data string) string {
-	return strings.TrimSuffix(strings.TrimPrefix(data, "["), "]")
+func TrimJSONArray(json string) string {
+	return strings.TrimSuffix(strings.TrimPrefix(json, "["), "]")
 }
 
-// FormatInterfaceToJSON formats an object into a JSON string.
+// FormatJSON formats an object into a JSON string.
 // Returns an empty string if an error occurs.
-func FormatInterfaceToJSON(data ...interface{}) string {
-	if len(data) == 1 {
-		bytes, err := json.Marshal(data[0])
+func FormatJSON(args ...any) string {
+	if len(args) == 1 {
+		bytes, err := json.Marshal(args[0])
 		if err != nil {
 			RPanic("failed to format JSON", err)
 			return ""
 		}
 		return helper.BytesToString(bytes)
 	} else {
-		bytes, err := json.Marshal(data)
+		bytes, err := json.Marshal(args)
 		if err != nil {
 			RPanic("failed to format JSON", err)
 			return ""

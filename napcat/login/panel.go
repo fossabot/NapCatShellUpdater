@@ -13,10 +13,6 @@ import (
 )
 
 func NapCatLogin() {
-	if flags.Config.NapCatPanelURL == "" || flags.Config.NapCatToken == "" {
-		log.Error("NapCatShellUpdater", "NapCatPanelURL or NapCatToken is empty")
-		return
-	}
 	token := loginNapCatPanel()
 	if token != "" {
 		loginList := getNapCatPanelLoginList(token)
