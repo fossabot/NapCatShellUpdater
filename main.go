@@ -7,7 +7,6 @@ import (
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat"
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat/login"
 	"github.com/sirupsen/logrus"
-	"os"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -54,15 +53,14 @@ func main() {
 		case p := <-ncProc:
 			log.Debug("NapCatShellUpdater", "NapCat process found:", p.String())
 		case e := <-err:
-			log.Error("NapCatShellUpdater", "Failed to find NapCat process:", e)
-			os.Exit(1)
+			panic(e)
 		}
 		log.Debug("NapCatShellUpdater", "Waiting 30s to full load NapCat")
 		time.Sleep(30 * time.Second)
 		log.Info("NapCatShellUpdater", "Login to NapCat Panel...")
 		if flags.Config.NapCatPanelURL == "" || flags.Config.NapCatToken == "" {
 			log.Error("NapCatShellUpdater", "NapCatPanelURL or NapCatToken is empty, trying find NapCat Panel url and token in logs...")
-			url, token, err := login.GetNapCatPanelURLInLogs(filepath.Join(flags.Config.Path, "logs"))
+			url, token, err := napcat.GetNapCatPanelURLInLogs(filepath.Join(flags.Config.Path, "logs"))
 			if err != nil {
 				panic(err)
 			}
