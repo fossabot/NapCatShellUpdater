@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/Sn0wo2/NapCatShellUpdater/log"
 	"path/filepath"
+	"time"
 )
 
 var Config struct {
@@ -14,6 +15,7 @@ var Config struct {
 	NapCatToken    string
 	Login          bool
 	Version        string
+	Sleep          time.Duration
 }
 
 func InitFlag() bool {
@@ -31,6 +33,7 @@ func InitFlag() bool {
 	flag.StringVar(&Config.NapCatToken, "nctoken", "token", "NapCat Token")
 	flag.BoolVar(&Config.Login, "login", true, "Login to NapCat Panel")
 	flag.StringVar(&Config.Version, "version", "", "Update NapCat Version")
+	flag.DurationVar(&Config.Sleep, "sleep", 30, "Sleep time(Wait NapCat load)")
 	flag.Parse()
 	return true
 }
