@@ -55,8 +55,8 @@ func main() {
 		case e := <-err:
 			panic(e)
 		}
-		log.Debug("NapCatShellUpdater", "Waiting 30s to full load NapCat")
-		time.Sleep(30 * time.Second)
+		log.Info("NapCatShellUpdater", fmt.Sprintf("Waiting %s to full load NapCat", flags.Config.Sleep.String()))
+		time.Sleep(flags.Config.Sleep)
 		log.Info("NapCatShellUpdater", "Login to NapCat Panel...")
 		if flags.Config.NapCatPanelURL == "" || flags.Config.NapCatToken == "" {
 			log.Error("NapCatShellUpdater", "NapCatPanelURL or NapCatToken is empty, trying find NapCat Panel url and token in logs...")
