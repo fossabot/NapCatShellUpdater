@@ -33,7 +33,7 @@ func InitFlag() bool {
 	flag.StringVar(&Config.NapCatToken, "nctoken", "token", "NapCat Token")
 	flag.BoolVar(&Config.Login, "login", true, "Login to NapCat Panel")
 	flag.StringVar(&Config.Version, "version", "", "Update NapCat Version")
-	flag.DurationVar(&Config.Sleep, "sleep", 30, "Sleep time(Wait NapCat load)")
+	flag.DurationVar(&Config.Sleep, "sleep", 30*time.Second, "Sleep time(Wait NapCat load)")
 	flag.Parse()
 	return true
 }
