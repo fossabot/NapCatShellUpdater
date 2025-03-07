@@ -9,12 +9,12 @@ import (
 
 var Config struct {
 	Path           string
+	Version        string
 	Proxy          string
 	Debug          bool
+	Login          bool
 	NapCatPanelURL string
 	NapCatToken    string
-	Login          bool
-	Version        string
 	Sleep          time.Duration
 }
 
@@ -27,12 +27,12 @@ func InitFlag() bool {
 		Config.Path = path
 		log.RPanic(err)
 	}
+	flag.StringVar(&Config.Version, "version", "", "Update NapCat Version")
 	flag.StringVar(&Config.Proxy, "proxy", "", "HTTP Proxy")
 	flag.BoolVar(&Config.Debug, "debug", true, "Enable debug logging")
-	flag.StringVar(&Config.NapCatPanelURL, "ncpanel", "http://127.0.0.1:6099", "NapCat Panel URL")
-	flag.StringVar(&Config.NapCatToken, "nctoken", "token", "NapCat Token")
 	flag.BoolVar(&Config.Login, "login", true, "Login to NapCat Panel")
-	flag.StringVar(&Config.Version, "version", "", "Update NapCat Version")
+	flag.StringVar(&Config.NapCatPanelURL, "ncpanel", "http://127.0.0.1:6099", "NapCat Panel URL")
+	flag.StringVar(&Config.NapCatToken, "nctoken", "napcat", "NapCat Token")
 	flag.DurationVar(&Config.Sleep, "sleep", 30*time.Second, "Sleep time(Wait NapCat load)")
 	flag.Parse()
 	return true
