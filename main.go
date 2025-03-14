@@ -40,11 +40,13 @@ $$ | \$$ \$$$$$$$ $$$$$$$  \$$$$$$  \$$$$$$$ |\$$$$  \$$$$$$  $$ |  $$ \$$$$$$$\
 }
 
 func main() {
-	cv := flags.Config.Version
-	if cv == "" {
-		napcat.CheckNapCatUpdate()
-	} else {
-		napcat.ProcessVersionUpdate(cv)
+	if !flags.Config.SkipCheck {
+		cv := flags.Config.Version
+		if cv == "" {
+			napcat.CheckNapCatUpdate()
+		} else {
+			napcat.ProcessVersionUpdate(cv)
+		}
 	}
 	if flags.Config.Login {
 		log.Info("NapCatShellUpdater", "Wating NapCat process to login...")
