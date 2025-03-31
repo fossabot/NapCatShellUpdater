@@ -2,8 +2,9 @@ package flags
 
 import (
 	"flag"
-	"github.com/Sn0wo2/NapCatShellUpdater/log"
 	"path/filepath"
+
+	"github.com/Sn0wo2/NapCatShellUpdater/log"
 )
 
 var Config struct {

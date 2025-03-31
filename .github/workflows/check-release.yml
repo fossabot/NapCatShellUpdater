@@ -108,7 +108,7 @@ jobs:
           echo "Skipping special platform: $platform (requires custom build)"
           continue
           fi
-        
+          
           if [[ "$GOARCH" == "amd64" ]]; then
           for GOAMD64 in v1 v2 v3; do  # 包含 v1
           output_name="build/${GITHUB_REPOSITORY##*/}_${GOOS}_${GOARCH}${GOAMD64}${EXTS}"
@@ -149,4 +149,4 @@ jobs:
           prerelease: false
           fail_on_unmatched_files: false
           files: |
-              build/*
+            build/*

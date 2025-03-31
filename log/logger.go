@@ -3,11 +3,12 @@ package log
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Sn0wo2/NapCatShellUpdater/helper"
 	"io"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/Sn0wo2/NapCatShellUpdater/helper"
 
 	"github.com/sirupsen/logrus"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
