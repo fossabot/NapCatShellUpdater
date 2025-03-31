@@ -1,8 +1,9 @@
 package napcat
 
 import (
-	"github.com/shirou/gopsutil/process"
 	"time"
+
+	"github.com/shirou/gopsutil/process"
 )
 
 func WaitForProcess(targetPath string) (<-chan *process.Process, <-chan error) {

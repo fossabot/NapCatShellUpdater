@@ -3,8 +3,6 @@ package napcat
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/Sn0wo2/NapCatShellUpdater/flags"
-	"github.com/Sn0wo2/NapCatShellUpdater/log"
 	"io"
 	"net/http"
 	"net/url"
@@ -12,6 +10,9 @@ import (
 	"path/filepath"
 	"slices"
 	"time"
+
+	"github.com/Sn0wo2/NapCatShellUpdater/flags"
+	"github.com/Sn0wo2/NapCatShellUpdater/log"
 )
 
 func downloadFile(downloadURL string) string {

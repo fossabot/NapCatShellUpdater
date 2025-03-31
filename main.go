@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"runtime"
+
+	"github.com/sirupsen/logrus"
+
 	"github.com/Sn0wo2/NapCatShellUpdater/flags"
 	"github.com/Sn0wo2/NapCatShellUpdater/log"
 	"github.com/Sn0wo2/NapCatShellUpdater/napcat"
-	"github.com/sirupsen/logrus"
-	"runtime"
 )
 
 func init() {
@@ -17,7 +18,8 @@ func init() {
 		panic(err)
 	}
 
-	fmt.Println(`$$\   $$\                   $$$$$$\           $$\     $$$$$$\ $$\               $$\$$\$$\   $$\               $$\          $$\                       
+	log.Info("NapCatShellUpdater", `
+$$\   $$\                   $$$$$$\           $$\     $$$$$$\ $$\               $$\$$\$$\   $$\               $$\          $$\                       
 $$$\  $$ |                 $$  __$$\          $$ |   $$  __$$\$$ |              $$ $$ $$ |  $$ |              $$ |         $$ |                      
 $$$$\ $$ |$$$$$$\  $$$$$$\ $$ /  \__|$$$$$$\$$$$$$\  $$ /  \__$$$$$$$\  $$$$$$\ $$ $$ $$ |  $$ |$$$$$$\  $$$$$$$ |$$$$$$\$$$$$$\   $$$$$$\  $$$$$$\  
 $$ $$\$$ |\____$$\$$  __$$\$$ |      \____$$\_$$  _| \$$$$$$\ $$  __$$\$$  __$$\$$ $$ $$ |  $$ $$  __$$\$$  __$$ |\____$$\_$$  _| $$  __$$\$$  __$$\ 

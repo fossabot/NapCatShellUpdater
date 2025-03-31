@@ -2,15 +2,17 @@ package napcat
 
 import (
 	"fmt"
-	"github.com/Sn0wo2/NapCatShellUpdater/flags"
-	"github.com/Sn0wo2/NapCatShellUpdater/helper"
-	"github.com/Sn0wo2/NapCatShellUpdater/log"
-	"github.com/tidwall/gjson"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"github.com/tidwall/gjson"
+
+	"github.com/Sn0wo2/NapCatShellUpdater/flags"
+	"github.com/Sn0wo2/NapCatShellUpdater/helper"
+	"github.com/Sn0wo2/NapCatShellUpdater/log"
 )
 
 func CheckNapCatUpdate() {
