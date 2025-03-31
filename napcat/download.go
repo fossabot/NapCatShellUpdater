@@ -36,7 +36,6 @@ func downloadFile(downloadURL string) string {
 	}
 	defer resp.Body.Close()
 
-	// 使用当前时间作为文件名
 	filename := fmt.Sprintf("NapCat.Shell(%d).zip", time.Now().Unix())
 	file, err := os.Create(filename)
 	if err != nil {

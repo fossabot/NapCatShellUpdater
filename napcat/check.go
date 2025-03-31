@@ -1,7 +1,6 @@
 package napcat
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/Sn0wo2/NapCatShellUpdater/flags"
 	"github.com/Sn0wo2/NapCatShellUpdater/helper"
@@ -12,10 +11,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
-	"sort"
-	"strings"
-	"time"
 )
 
 func CheckNapCatUpdate() {
@@ -40,67 +35,6 @@ func ProcessVersionUpdate(ver string) {
 	} else {
 		log.Info("NapCatShellUpdater", "NapCat is up to date: ", currentVersion)
 	}
-}
-
-func GetNapCatPanelURLInLogs(dirPath string) (string, string, error) {
-	fileInfo, err := os.Stat(dirPath)
-	if err != nil || !fileInfo.IsDir() {
-		return "", "", fmt.Errorf("invalid directory path: %s", dirPath)
-	}
-	entries, err := os.ReadDir(dirPath)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to read directory: %v", err)
-	}
-	urlTokenRegex := regexp.MustCompile(`(https?://[^\s:/]+:\d+)/webui\?token=([^\s]+)`)
-	var logFiles []struct {
-		Path    string
-		ModTime time.Time
-	}
-	for _, entry := range entries {
-		if entry.IsDir() || strings.HasPrefix(entry.Name(), ".") || strings.ToLower(filepath.Ext(entry.Name())) != ".log" {
-			continue
-		}
-
-		fullPath := filepath.Join(dirPath, entry.Name())
-		fileInfo, err := entry.Info()
-		if err != nil {
-			continue
-		}
-
-		logFiles = append(logFiles, struct {
-			Path    string
-			ModTime time.Time
-		}{
-			Path:    fullPath,
-			ModTime: fileInfo.ModTime(),
-		})
-	}
-
-	if len(logFiles) == 0 {
-		return "", "", fmt.Errorf("no log files found in %s", dirPath)
-	}
-
-	sort.Slice(logFiles, func(i, j int) bool {
-		return logFiles[i].ModTime.After(logFiles[j].ModTime)
-	})
-
-	for _, logFile := range logFiles {
-		f, err := os.Open(logFile.Path)
-		if err != nil {
-			continue
-		}
-		defer f.Close()
-
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			matches := urlTokenRegex.FindStringSubmatch(scanner.Text())
-			if len(matches) >= 3 {
-				return matches[1], matches[2], nil
-			}
-		}
-	}
-
-	return "", "", fmt.Errorf("no matching URL found in %s", dirPath)
 }
 
 func processAndUpdate(filename string) {
