@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Sn0wo2/NapCatShellUpdater/helper"
-	"github.com/sirupsen/logrus"
-	easy "github.com/t-tomalak/logrus-easy-formatter"
 	"io"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/sirupsen/logrus"
+	easy "github.com/t-tomalak/logrus-easy-formatter"
 )
 
 // Logger is an instance of the logrus logger.
@@ -107,7 +108,7 @@ func RPanic(args ...any) {
 		buf = buf[:n]
 	}
 
-	Error("panic", TrimJSONArray(fmt.Sprint(args...)), "\n", helper.BytesToString(buf))
+	Error("Panic", TrimJSONArray(fmt.Sprint(args...)), "\n", helper.BytesToString(buf))
 }
 
 // TrimJSONArray trims the JSON array from the string for print
@@ -121,18 +122,17 @@ func FormatJSON(args ...any) string {
 	if len(args) == 1 {
 		bytes, err := json.Marshal(args[0])
 		if err != nil {
-			RPanic("failed to format JSON", err)
-			return ""
-		}
-		return helper.BytesToString(bytes)
-	} else {
-		bytes, err := json.Marshal(args)
-		if err != nil {
-			RPanic("failed to format JSON", err)
+			RPanic(err)
 			return ""
 		}
 		return helper.BytesToString(bytes)
 	}
+	bytes, err := json.Marshal(args)
+	if err != nil {
+		RPanic(err)
+		return ""
+	}
+	return helper.BytesToString(bytes)
 }
 
 // DefaultFormatter returns a default easy formatter.

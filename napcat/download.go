@@ -36,7 +36,6 @@ func downloadFile(downloadURL string) string {
 	}
 	defer resp.Body.Close()
 
-	// 使用当前时间作为文件名
 	filename := fmt.Sprintf("NapCat.Shell(%d).zip", time.Now().Unix())
 	file, err := os.Create(filename)
 	if err != nil {
@@ -108,9 +107,9 @@ func unzipWithExclusion(src, dest string, exclude []string) error {
 		}
 		fpath := filepath.Join(dest, f.Name)
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(fpath, os.ModePerm)
+			_ = os.MkdirAll(fpath, os.ModePerm)
 		} else {
-			os.MkdirAll(filepath.Dir(fpath), os.ModePerm)
+			_ = os.MkdirAll(filepath.Dir(fpath), os.ModePerm)
 			outFile, err := os.Create(fpath)
 			if err != nil {
 				return fmt.Errorf("failed to create file: %w", err)
