@@ -19,7 +19,10 @@ func CheckNapCatUpdate() {
 	currentVersion := getCurrentNapCatVersion()
 	if newVersion != currentVersion {
 		log.Info("NapCatShellUpdater", fmt.Sprintf("Updating NapCat from %s to %s", currentVersion, newVersion))
-		processAndUpdate(downloadFile(fmt.Sprintf("https://github.com/NapNeko/NapCatQQ/releases/download/%s/NapCat.Shell.zip", newVersion)))
+		if flags.Config.DownloadURL == "" {
+			flags.Config.DownloadURL = fmt.Sprintf("https://github.com/NapNeko/NapCatQQ/releases/download/%s/NapCat.Shell.zip", newVersion)
+		}
+		processAndUpdate(downloadFile(flags.Config.DownloadURL))
 	} else {
 		log.Info("NapCatShellUpdater", "NapCat is up to date: ", currentVersion)
 	}
