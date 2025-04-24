@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/Sn0wo2/NapCatShellUpdater/helper"
+	"github.com/Sn0wo2/NapCatShellUpdater/pkg/helper"
 
 	"github.com/sirupsen/logrus"
 	easy "github.com/t-tomalak/logrus-easy-formatter"

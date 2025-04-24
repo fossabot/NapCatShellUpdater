@@ -3,11 +3,10 @@ package main
 import (
 	"runtime"
 
+	"github.com/Sn0wo2/NapCatShellUpdater/internal/flags"
+	"github.com/Sn0wo2/NapCatShellUpdater/pkg/log"
+	"github.com/Sn0wo2/NapCatShellUpdater/pkg/napcat"
 	"github.com/sirupsen/logrus"
-
-	"github.com/Sn0wo2/NapCatShellUpdater/flags"
-	"github.com/Sn0wo2/NapCatShellUpdater/log"
-	"github.com/Sn0wo2/NapCatShellUpdater/napcat"
 )
 
 func init() {

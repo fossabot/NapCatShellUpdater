@@ -11,8 +11,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/Sn0wo2/NapCatShellUpdater/flags"
-	"github.com/Sn0wo2/NapCatShellUpdater/log"
+	"github.com/Sn0wo2/NapCatShellUpdater/internal/flags"
+	"github.com/Sn0wo2/NapCatShellUpdater/pkg/log"
 )
 
 func downloadFile(downloadURL string) string {
