@@ -118,7 +118,7 @@ jobs:
           -ldflags="-s -w -buildid= -extldflags='-fno-PIC'" \
           -gcflags="all=-l -B -trimpath=" \
           -o "$output_name" \
-          -v || echo "Failed to build for $platform with $GOAMD64"
+          -v ./internal/cmd || echo "Failed to build for $platform with $GOAMD64"
           done
           else
           output_name="build/${GITHUB_REPOSITORY##*/}_${GOOS}_${GOARCH}${EXTS}"
@@ -128,7 +128,7 @@ jobs:
           -ldflags="-s -w -buildid= -extldflags='-fno-PIC'" \
           -gcflags="all=-l -B -trimpath=" \
           -o "$output_name" \
-          -v || echo "Failed to build for $platform"
+          -v ./internal/cmd || echo "Failed to build for $platform"
           fi
           done
 
