@@ -8,11 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Sn0wo2/NapCatShellUpdater/internal/flags"
+	"github.com/Sn0wo2/NapCatShellUpdater/pkg/helper"
+	"github.com/Sn0wo2/NapCatShellUpdater/pkg/log"
 	"github.com/tidwall/gjson"
-
-	"github.com/Sn0wo2/NapCatShellUpdater/flags"
-	"github.com/Sn0wo2/NapCatShellUpdater/helper"
-	"github.com/Sn0wo2/NapCatShellUpdater/log"
 )
 
 func CheckNapCatUpdate() {

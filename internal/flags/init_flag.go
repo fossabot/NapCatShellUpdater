@@ -4,7 +4,7 @@ import (
 	"flag"
 	"path/filepath"
 
-	"github.com/Sn0wo2/NapCatShellUpdater/log"
+	"github.com/Sn0wo2/NapCatShellUpdater/pkg/log"
 )
 
 var Config struct {
