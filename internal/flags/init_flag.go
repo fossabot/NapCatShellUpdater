@@ -12,6 +12,7 @@ var Config struct {
 	Version     string
 	Proxy       string
 	DownloadURL string
+	Exclude     string
 	Debug       bool
 }
 
@@ -21,6 +22,7 @@ func InitFlag() bool {
 	flag.StringVar(&Config.Version, "version", "", "Update NapCat Version")
 	flag.StringVar(&Config.Proxy, "proxy", "", "HTTP Proxy")
 	flag.StringVar(&Config.DownloadURL, "download-url", "", "Download NapCat URL")
+	flag.StringVar(&Config.Exclude, "exclude", "", "Exclude files")
 	flag.BoolVar(&Config.Debug, "debug", true, "Enable debug logging")
 	flag.Parse()
 	var err error

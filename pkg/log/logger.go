@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/Sn0wo2/NapCatShellUpdater/pkg/helper"
-
 	"github.com/sirupsen/logrus"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
 )
@@ -25,7 +24,7 @@ func InitLogger(logPath string, formatter *easy.Formatter, logLevel logrus.Level
 	writers = append(writers, os.Stdout)
 
 	if logPath != "" {
-		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o666)
 		if err != nil {
 			return fmt.Errorf("failed to open log file %s: %w", logPath, err)
 		}

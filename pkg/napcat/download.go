@@ -58,7 +58,6 @@ func cleanDirectory(targetPath string, exclude []string) error {
 	}
 
 	for _, file := range files {
-		// 跳过当前执行的文件
 		if slices.Contains(exclude, file.Name()) {
 			continue
 		}

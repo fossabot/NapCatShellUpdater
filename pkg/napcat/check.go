@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Sn0wo2/NapCatShellUpdater/internal/flags"
 	"github.com/Sn0wo2/NapCatShellUpdater/pkg/helper"
@@ -49,7 +50,11 @@ func processAndUpdate(filename string) {
 	}
 
 	log.Info("NapCatShellUpdater", "Clean target directory...")
-	err = cleanDirectory(flags.Config.Path, []string{"config", "logs", "quickLoginExample.bat", "update.bat", filepath.Base(os.Args[0]), filename})
+	if flags.Config.Exclude == "" {
+		flags.Config.Exclude = "config,logs,quickLoginExample.bat,update.bat"
+	}
+	flags.Config.Exclude += "," + filepath.Base(os.Args[0]) + "," + filename
+	err = cleanDirectory(flags.Config.Path, strings.Split(flags.Config.Exclude, ","))
 	if err != nil {
 		log.RPanic(err)
 	}
