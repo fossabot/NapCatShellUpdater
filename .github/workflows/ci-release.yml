@@ -134,7 +134,7 @@ jobs:
 
       - name: Create or Update Release
         if: env.version != ''
-        uses: softprops/action-gh-release@main
+        uses: softprops/action-gh-release@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
