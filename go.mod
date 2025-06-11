@@ -1,6 +1,6 @@
 module github.com/Sn0wo2/NapCatShellUpdater
 
-go 1.24.1
+go 1.24.4
 
 require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
