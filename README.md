@@ -3,10 +3,6 @@
 
 ---
 
-##### ⚠ 仅考虑适配最新版[` NapCat `](https://github.com/NapNeko/NapCatQQ)⚠
-
----
-
 将程序放在你的NapCat.Shell工作目录双击打开或使用命令
 
 ``` shell
